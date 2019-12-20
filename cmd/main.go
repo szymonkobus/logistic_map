@@ -39,7 +39,6 @@ func main() {
   fmt.Println(v)
 */
 
-
 /*
     set := make(map[string]bool) // New empty set
     set["Foo"] = true            // Add
