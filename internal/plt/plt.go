@@ -48,7 +48,7 @@ func PlotPoints(p [][]defs.Point) {
     }
 
 
-    if err := diagram.Save(vg.Length(size*7)*vg.Inch, vg.Length(size*7)*vg.Inch, "out.png"); err != nil {
+    if err := diagram.Save(vg.Length(size*7)*vg.Inch, vg.Length(size*7)*vg.Inch, "out2.png"); err != nil {
 		panic(err)
 	}
 }

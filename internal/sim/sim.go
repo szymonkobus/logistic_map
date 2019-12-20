@@ -5,23 +5,26 @@ import(
     "fmt"
     )
 
-func findCycle(l []float64, i int) (bool, int) {
+func findCycle(l []float64, i int) int {
     val := l[i]
     for j:=i-1; j>=0; j-- {
         if l[j] == val{
-            return true, j
+            return  j
         }
     }
-    return false, -1
+    return -1
 }
 
 func convergencePoints(k float64,
                         state float64,
                         p []defs.Point,
                         verbose bool) ([]defs.Point,bool) {
+    if(verbose){ fmt.Println("k: ",k,"\ts: ",state,"\tdefs.Limit: ",defs.Limit) }
+
     trace := [defs.Limit]float64{}
     trace[0] = state
-    if(verbose){ fmt.Println("k: ",k,"\ts: ",state,"\tdefs.Limit: ",defs.Limit) }
+    setStates := make(map[float64]bool)
+    setStates[state] = true
 
     for i := 1; i<defs.Limit; i++{
         if( state < 0 || 1 < state){
@@ -29,14 +32,15 @@ func convergencePoints(k float64,
         }
         state = k * state * (1 - state)
         trace[i] = state
-        if verbose { fmt.Println("s: ", state) }
-        if found, idx := findCycle(trace[:], i); found {
+        if setStates[state] {
             if verbose { fmt.Println("convergance", state, "\tsteps: ",i) }
+            idx := findCycle(trace[:], i)
             for j := idx; j < i; j++ {
                 p = append(p, defs.Point{k, trace[j]})
             }
             return p, true
         }
+        setStates[state] = true
     }
     return p, false
 }
