@@ -33,7 +33,7 @@ func PlotPoints(p [][]defs.Point) {
     diagram.Y.Label.Text = "value"
     diagram.Add(plotter.NewGrid())
 
-    var size float64 = 20
+    var size float64 = 2
 
     for i := 0; i < len(plotterL); i++{
         scatter, err := plotter.NewScatter(plotterL[i])
@@ -43,12 +43,12 @@ func PlotPoints(p [][]defs.Point) {
         red_lvl:= uint8(255*float64(i)/float64(len(plotterL)-1))
         scatter.GlyphStyle.Color = color.RGBA{R: red_lvl, B: 128, A: 255}
         scatter.GlyphStyle.Shape = draw.CircleGlyph{}
-        scatter.GlyphStyle.Radius = vg.Points(size*1)
+        scatter.GlyphStyle.Radius = vg.Points(0.5*size)
         diagram.Add(scatter)
     }
 
 
-    if err := diagram.Save(vg.Length(size*7)*vg.Inch, vg.Length(size*7)*vg.Inch, "out2.png"); err != nil {
+    if err := diagram.Save(vg.Length(size*7)*vg.Inch, vg.Length(size*7)*vg.Inch, "out.png"); err != nil {
 		panic(err)
 	}
 }

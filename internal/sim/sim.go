@@ -61,26 +61,44 @@ func endPoints(k float64,
     return append(p, defs.Point{k, state})
 }
 
-func RunSimulation() [][]defs.Point {
-    var p [2][]defs.Point
+type simSett struct {kMin,kMax,kStep,sMin,sMax,sStep,state float64}
 
-    state := 0.5
-    var kMin float64 = 2
-    var kMax float64 = 3.99
-    var kStep float64= 0.001
-    var sMin float64 = 0.1
-    var sMax float64 = 0.9
-    var sStep float64= 0.1
-
+func runSimThread(st simSett, p [2][]defs.Point) [2][]defs.Point {
     var cycles bool
-    for k := kMin; k <= kMax; k+=kStep {
-        p[0],cycles = convergencePoints(k,state,p[0],false)
+    for k := st.kMin; k<=st.kMax; k+=st.kStep {
+        p[0], cycles = convergencePoints(k,st.state,p[0],false)
         if !cycles {
-            for s := sMin; s <= sMax && s!=state; s+=sStep{
+            for s := st.sMin; s<=st.sMax && s!=st.state; s+=st.sStep{
                 p[1] = endPoints(k,s,p[1],false)
             }
         }
     }
 
-    return p[:]
+    return p
+}
+
+func RunSimulation() [][]defs.Point {
+    scale := defs.Cores
+    p := make([][2][]defs.Point,scale)
+    var kStep float64 = 0.001
+    simSettings := simSett{kMin:0,kMax:4,kStep:kStep*float64(scale),
+                           sMin:0.01,sMax:0.99,sStep:0.05,
+                           state:0.5}
+
+    c := make(chan int)
+    for i := 0; i < scale; i++{
+        go func(a int, s simSett) {
+            p[a] = runSimThread(s, p[a])
+            c <- a
+        }(i, simSettings)
+        simSettings.kMin += kStep
+    }
+    var done int
+    var ret [2][]defs.Point
+    for i := 0; i < scale; i++{
+        done = <-c
+        ret[0] = append(ret[0], p[done][0]...)
+        ret[1] = append(ret[1], p[done][1]...)
+    }
+    return ret[:]
 }
