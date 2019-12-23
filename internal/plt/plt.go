@@ -43,7 +43,7 @@ func PlotPoints(p [][]defs.Point) {
         red_lvl:= uint8(255*float64(i)/float64(len(plotterL)-1))
         scatter.GlyphStyle.Color = color.RGBA{R: red_lvl, B: 128, A: 255}
         scatter.GlyphStyle.Shape = draw.CircleGlyph{}
-        scatter.GlyphStyle.Radius = vg.Points(0.5*size)
+        scatter.GlyphStyle.Radius = vg.Points(1*size)
         diagram.Add(scatter)
     }
 

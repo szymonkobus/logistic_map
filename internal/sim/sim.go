@@ -3,6 +3,8 @@ package sim
 import(
     "../defs"
     "fmt"
+    "encoding/json"
+    "io/ioutil"
     )
 
 func findCycle(l []float64, i int) int {
@@ -61,14 +63,22 @@ func endPoints(k float64,
     return append(p, defs.Point{k, state})
 }
 
-type simSett struct {kMin,kMax,kStep,sMin,sMax,sStep,state float64}
+type simSett struct {
+    Kmin    float64 `json:"Kmin"`
+    Kmax    float64 `json:"Kmax"`
+    Kstep   float64 `json:"kDelta"`
+    Smin    float64 `json:"stateMin"`
+    Smax    float64 `json:"stateMax"`
+    Sstep   float64 `json:"stateStep"`
+    State   float64 `json:"state"`
+}
 
 func runSimThread(st simSett, p [2][]defs.Point) [2][]defs.Point {
     var cycles bool
-    for k := st.kMin; k<=st.kMax; k+=st.kStep {
-        p[0], cycles = convergencePoints(k,st.state,p[0],false)
+    for k := st.Kmin; k<=st.Kmax; k+=st.Kstep {
+        p[0], cycles = convergencePoints(k,st.State,p[0],false)
         if !cycles {
-            for s := st.sMin; s<=st.sMax && s!=st.state; s+=st.sStep{
+            for s := st.Smin; s<=st.Smax && s!=st.State; s+=st.Sstep{
                 p[1] = endPoints(k,s,p[1],false)
             }
         }
@@ -77,13 +87,26 @@ func runSimThread(st simSett, p [2][]defs.Point) [2][]defs.Point {
     return p
 }
 
+func readSettings() (simSett) {
+    file, err := ioutil.ReadFile("internal/settings.json")
+    if err != nil {
+        panic(err)
+    }
+    s := simSett{}
+    _ = json.Unmarshal([]byte(file), &s)
+    if err != nil {
+        panic(err)
+    }
+    return s
+}
+
 func RunSimulation() [][]defs.Point {
+    simSettings := readSettings()
     scale := defs.Cores
     p := make([][2][]defs.Point,scale)
-    var kStep float64 = 0.001
-    simSettings := simSett{kMin:0,kMax:4,kStep:kStep*float64(scale),
-                           sMin:0.01,sMax:0.99,sStep:0.05,
-                           state:0.5}
+
+    var Kstep float64 = simSettings.Kstep
+    simSettings.Kstep *= float64(scale)
 
     c := make(chan int)
     for i := 0; i < scale; i++{
@@ -91,7 +114,7 @@ func RunSimulation() [][]defs.Point {
             p[a] = runSimThread(s, p[a])
             c <- a
         }(i, simSettings)
-        simSettings.kMin += kStep
+        simSettings.Kmin += Kstep
     }
     var done int
     var ret [2][]defs.Point

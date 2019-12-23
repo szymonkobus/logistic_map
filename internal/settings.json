@@ -1,0 +1,9 @@
+{
+ "kMin": 0,
+ "kMax": 4,
+ "kDelta": 0.1,
+ "stateMin": 0.01,
+ "stateMax": 0.99,
+ "stateStep": 0.05,
+ "state": 0.5
+}
